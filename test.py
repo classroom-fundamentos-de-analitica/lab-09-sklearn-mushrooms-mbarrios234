@@ -4,7 +4,7 @@ import os
 import pickle
 
 import pandas as pd
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.metrics import accuracy_score
 
 
 def load_estimator():
@@ -23,7 +23,7 @@ def load_datasets():
 
     train_dataset = pd.read_csv("train_dataset.csv")
     test_dataset = pd.read_csv("test_dataset.csv")
-
+    
     train_dataset['type'] = train_dataset['type'].replace({'e':1,'p':0})
     test_dataset['type'] = test_dataset['type'].replace({'e':1,'p':0})
     train_dataset = pd.get_dummies(train_dataset, dtype=int)
@@ -70,6 +70,7 @@ def run_grading():
 
     assert accuracy_train > 0.99
     assert accuracy_test > 0.99
+
 
 if __name__ == "__main__":
     run_grading()
