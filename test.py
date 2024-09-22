@@ -24,11 +24,16 @@ def load_datasets():
     train_dataset = pd.read_csv("train_dataset.csv")
     test_dataset = pd.read_csv("test_dataset.csv")
 
-    x_train = train_dataset.drop("target", axis=1)
-    y_train = train_dataset["target"]
+    train_dataset['type'] = train_dataset['type'].replace({'e':1,'p':0})
+    test_dataset['type'] = test_dataset['type'].replace({'e':1,'p':0})
+    train_dataset = pd.get_dummies(train_dataset, dtype=int)
+    test_dataset = pd.get_dummies(test_dataset, dtype=int)
 
-    x_test = test_dataset.drop("target", axis=1)
-    y_test = test_dataset["target"]
+    x_train = train_dataset.drop(['type','cap_shape_c'], axis=1)
+    y_train = train_dataset["type"]
+
+    x_test = test_dataset.drop("type", axis=1)
+    y_test = test_dataset["type"]
 
     return x_train, x_test, y_train, y_test
 
@@ -36,11 +41,9 @@ def load_datasets():
 def eval_metrics(y_true, y_pred):
     """Evaluate model performance."""
 
-    mse = mean_squared_error(y_true, y_pred)
-    mae = mean_absolute_error(y_true, y_pred)
-    r2 = r2_score(y_true, y_pred)
+    accuracy = accuracy_score(y_true, y_pred)
 
-    return mse, mae, r2
+    return accuracy
 
 
 def compute_metrics():
@@ -54,25 +57,19 @@ def compute_metrics():
     y_pred_train = estimator.predict(x_train)
     y_pred_test = estimator.predict(x_test)
 
-    mse_train, mae_train, r2_train = eval_metrics(y_true_train, y_pred_train)
-    mse_test, mae_test, r2_test = eval_metrics(y_true_test, y_pred_test)
+    accuracy_train = eval_metrics(y_true_train, y_pred_train)
+    accuracy_test = eval_metrics(y_true_test, y_pred_test)
 
-    return mse_train, mae_train, r2_train, mse_test, mae_test, r2_test
+    return accuracy_train, accuracy_test
 
 
 def run_grading():
     """Run grading script."""
 
-    mse_train, mae_train, r2_train, mse_test, mae_test, r2_test = compute_metrics()
+    accuracy_train, accuracy_test = compute_metrics()
 
-    assert mse_train < 2903, f"Train MSE: {mse_train:.2f}"
-    assert mse_test < 2856, f"Test MSE: {mse_test:.2f}"
-    assert mae_train < 43.8, f"Train MAE: {mae_train:.2f}"
-    assert mae_test < 43.2, f"Test MAE: {mae_test:.2f}"
-    assert r2_train > 0.48, f"Train R2: {r2_train:.2f}"
-    assert r2_test > 0.56, f"Test R2: {r2_test:.2f}"
-
-
+    assert accuracy_train > 0.99
+    assert accuracy_test > 0.99
 
 if __name__ == "__main__":
     run_grading()
